@@ -1,0 +1,576 @@
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "countries")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Country {
+
+    @Id
+    @Column(name = "country_id", length = 4, nullable = false)
+    private String countryId;
+
+    @Column(name = "country_name", length = 60)
+    private String countryName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    @JsonIgnoreProperties({"regionName"})
+    private Region region;
+
+    public Country() {}
+
+    public String getCountryId() {
+        return countryId;
+    }
+
+    public void setCountryId(String countryId) {
+        this.countryId = countryId;
+    }
+
+    public String getCountryName() {
+        return countryName;
+    }
+
+    public void setCountryName(String countryName) {
+        this.countryName = countryName;
+    }
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
+    }
+}
+
+
+-----------------------------------------------------------
+
+package com.example.hrApplication.entity;
+
+
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "departments")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Department {
+
+    @Id
+    @Column(name = "department_id", precision = 4, scale = 0, nullable = false)
+    private BigDecimal departmentId;
+
+    @Column(name = "department_name", length = 30, nullable = false)
+    private String departmentName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    @JsonIgnoreProperties({"country"})
+    private Location location;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    @JsonIgnoreProperties({"manager", "department", "job"})
+    private Employee manager;
+
+    public Department() {}
+
+    public BigDecimal getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(BigDecimal departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Employee getManager() {
+        return manager;
+    }
+
+    public void setManager(Employee manager) {
+        this.manager = manager;
+    }
+}
+
+-------------------------------------------------------------
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+ 
+@Entity
+@Table(name = "employees")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Employee {
+    @Id
+    @Column(name = "employee_id", precision = 6, scale = 0, nullable = false)
+    private BigDecimal employeeId;
+ 
+    @Column(name = "first_name", length = 20)
+    private String firstName;
+ 
+    @Column(name = "last_name", length = 25, nullable = false)
+    private String lastName;
+ 
+    @Column(name = "email", length = 25, nullable = false, unique = true)
+    private String email;
+ 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+ 
+    @Column(name = "hire_date", nullable = false)
+    private LocalDate hireDate;
+ 
+    @Column(name = "salary", precision = 8, scale = 2)
+    private BigDecimal salary;
+ 
+    @Column(name = "commission_pct", precision = 2, scale = 2)
+    private BigDecimal commissionPct;
+ 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id", nullable = false)
+    @JsonIgnoreProperties({"minSalary", "maxSalary"})
+    private Job job;
+ 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    @JsonIgnoreProperties({"manager", "job", "department"})
+    private Employee manager;
+ 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    @JsonIgnoreProperties({"manager", "location"})
+    private Department department;
+ 
+    public Employee() {}
+ 
+	public BigDecimal getEmployeeId() {
+		return employeeId;
+	}
+ 
+	public void setEmployeeId(BigDecimal employeeId) {
+		this.employeeId = employeeId;
+	}
+ 
+	public String getFirstName() {
+		return firstName;
+	}
+ 
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+ 
+	public String getLastName() {
+		return lastName;
+	}
+ 
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+ 
+	public String getEmail() {
+		return email;
+	}
+ 
+	public void setEmail(String email) {
+		this.email = email;
+	}
+ 
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+ 
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+ 
+	public LocalDate getHireDate() {
+		return hireDate;
+	}
+ 
+	public void setHireDate(LocalDate hireDate) {
+		this.hireDate = hireDate;
+	}
+ 
+	public BigDecimal getSalary() {
+		return salary;
+	}
+ 
+	public void setSalary(BigDecimal salary) {
+		this.salary = salary;
+	}
+ 
+	public BigDecimal getCommissionPct() {
+		return commissionPct;
+	}
+ 
+	public void setCommissionPct(BigDecimal commissionPct) {
+		this.commissionPct = commissionPct;
+	}
+ 
+	public Job getJob() {
+		return job;
+	}
+ 
+	public void setJob(Job job) {
+		this.job = job;
+	}
+ 
+	public Employee getManager() {
+		return manager;
+	}
+ 
+	public void setManager(Employee manager) {
+		this.manager = manager;
+	}
+ 
+	public Department getDepartment() {
+		return department;
+	}
+ 
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+ 
+    // generate all getters & setters
+}
+
+
+
+------------------------------------------------------------------
+
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "jobs")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Job {
+
+    @Id
+    @Column(name = "job_id", length = 10, nullable = false)
+    private String jobId;
+
+    @Column(name = "job_title", length = 35, nullable = false)
+    private String jobTitle;
+
+    @Column(name = "min_salary", precision = 6, scale = 0)
+    private BigDecimal minSalary;
+
+    @Column(name = "max_salary", precision = 6, scale = 0)
+    private BigDecimal maxSalary;
+
+    public Job() {}
+
+    public String getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(String jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(String jobTitle) {
+        this.jobTitle = jobTitle;
+    }
+
+    public BigDecimal getMinSalary() {
+        return minSalary;
+    }
+
+    public void setMinSalary(BigDecimal minSalary) {
+        this.minSalary = minSalary;
+    }
+
+    public BigDecimal getMaxSalary() {
+        return maxSalary;
+    }
+
+    public void setMaxSalary(BigDecimal maxSalary) {
+        this.maxSalary = maxSalary;
+    }
+}
+
+
+------------------------------------------------------------------
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "job_history")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class JobHistory {
+
+    @EmbeddedId
+    private JobHistoryKey id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("employeeId")
+    @JoinColumn(name = "employee_id", nullable = false)
+    @JsonIgnoreProperties({"manager", "department", "job"})
+    private Employee employee;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id", nullable = false)
+    private Job job;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    public JobHistory() {}
+
+	public JobHistoryKey getId() {
+		return id;
+	}
+
+	public void setId(JobHistoryKey id) {
+		this.id = id;
+	}
+
+	public Employee getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	public Department getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+
+    // getters & setters
+}
+
+
+
+-----------------------------------------------------------------
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Objects;
+
+@Embeddable
+public class JobHistoryKey implements Serializable {
+
+    @Column(name = "employee_id")
+    private BigDecimal employeeId;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    public JobHistoryKey() {}
+
+    public BigDecimal getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(BigDecimal employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JobHistoryKey)) return false;
+        JobHistoryKey that = (JobHistoryKey) o;
+        return Objects.equals(employeeId, that.employeeId) &&
+               Objects.equals(startDate, that.startDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(employeeId, startDate);
+    }
+}
+
+
+
+------------------------------------------------------------------
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "locations")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Location {
+
+    @Id
+    @Column(name = "location_id", precision = 4, scale = 0, nullable = false)
+    private BigDecimal locationId;
+
+    @Column(name = "street_address", length = 40)
+    private String streetAddress;
+
+    @Column(name = "postal_code", length = 12)
+    private String postalCode;
+
+    @Column(name = "city", length = 30, nullable = false)
+    private String city;
+
+    @Column(name = "state_province", length = 25)
+    private String stateProvince;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    @JsonIgnoreProperties({"region"})
+    private Country country;
+
+    public Location() {}
+
+    public BigDecimal getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(BigDecimal locationId) {
+        this.locationId = locationId;
+    }
+
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getStateProvince() {
+        return stateProvince;
+    }
+
+    public void setStateProvince(String stateProvince) {
+        this.stateProvince = stateProvince;
+    }
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+}
+
+
+
+-----------------------------------------------------------------
+package com.example.hrApplication.entity;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "regions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Region {
+
+    @Id
+    @Column(name = "region_id", nullable = false)
+    private BigDecimal regionId;
+
+    @Column(name = "region_name", length = 25)
+    private String regionName;
+
+    public Region() {}
+
+    public BigDecimal getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(BigDecimal regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+}
+
