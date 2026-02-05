@@ -1,0 +1,47 @@
+/api/v1/employees/{job_id}	PUT	Assign employees job using JOB ID	String: Record Modified Successfully
+
+/api/v1/employees/{manager_id}	PUT	Assign employee’s manager.	String: Record Modified Successfully
+
+/api/v1/employees/{department_id}	PUT	Assign employee’s department.	String: Record Modified Successfully
+
+/api/v1/employees/{department_id}/
+{sales_percentage}	PUT	Assign employee’s department and update the percentage for sales department employees	String: Record Modified Successfully
+
+/api/v1/employees/ findAllEmployeeWithNoCommission	GET	findAllEmployeeWithNoCommission	Employee
+
+
+/api/v1/employees/ findTotalCommissionIssued
+ToEmployee/{department_id}	GET	findTotalCommissionIssued
+ToEmployeeByDepartment	200: {
+“departmentid” : 1200,
+“sum” : 23000
+}
+
+/api/v1/employees/listAllEmployees/
+{department_id}	GET	listAllEmployeesByDepartment	Collection of Employees
+
+/api/v1/employees/employees_departmentwise_count	GET	countAllEmployeesGroupByDepartment	200:[{
+“departmentname” : “Treasury”,
+“count” : 23},
+:[{
+“departmentname” : “Manufacturing”,
+“count” : 34},
+……]
+
+/api/v1/employees/listallmanagerdetails	GET	listAllManagerDetails	Employee	
+/api/v1/ employees /locationwisecountofemployees	GET	countAllEmployeesGroupByLocation	Employee	
+/api/v1/employees/{empid}/findmaxsalaryofjob	GET	findMaxSalaryOfJobByEmployeeId	200:{
+“Job Title”: “Finance Manager”,
+“max salary” : 
+12000
+}	
+/api/v1/ employees/{email}	PUT	Update employee email	String: Record Modified Successfully	{"timeStamp":"2023-06-08", "message": "Validation failed …”}
+/api/v1/ employees/{phonenumber}	PUT	Update employee phone number	String: Record Modified Successfully	{"timeStamp":"2023-06-08", "message": "Validation failed …”}
+/api/v1/employees/findAllOpenPositions	GET	Find All Open Positions which was not filled	Collection of Job	
+/api/v1/ employees /findAllOpenPositions/{department_id}	GET	Find All Open Positions which was not filled in a particular department.	Collection of Job	
+/api/v1/employees/listallemployeebyhiredate/{from_hiredate}/{to_hiredate}	GET	List All employee hired on particular date range.	Collection of Employees	
+/api/v1/employees/{emp_id}	DELETE	Delete by employee Id.		
+
+
+
+
