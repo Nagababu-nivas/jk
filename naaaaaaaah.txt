@@ -1,0 +1,275 @@
+package com.example.credit_card.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "billing_summary_entity")
+public class BillingSummaryEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String creditcardNumber;
+    private String customerNumber;
+    private String customerName;
+    private String billDate;
+    private Double amount;
+    private String dueDate;
+    private String customerEmail;
+    private String contactNumber;
+
+    // Getters & Setters
+
+    public Long getId() { return id; }
+
+    public String getCreditcardNumber() { return creditcardNumber; }
+    public void setCreditcardNumber(String creditcardNumber) { this.creditcardNumber = creditcardNumber; }
+
+    public String getCustomerNumber() { return customerNumber; }
+    public void setCustomerNumber(String customerNumber) { this.customerNumber = customerNumber; }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getBillDate() { return billDate; }
+    public void setBillDate(String billDate) { this.billDate = billDate; }
+
+    public Double getAmount() { return amount; }
+    public void setAmount(Double amount) { this.amount = amount; }
+
+    public String getDueDate() { return dueDate; }
+    public void setDueDate(String dueDate) { this.dueDate = dueDate; }
+
+    public String getCustomerEmail() { return customerEmail; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
+
+    public String getContactNumber() { return contactNumber; }
+    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+}
+
+
+
+
+
+
+package com.example.credit_card.service;
+
+import com.example.credit_card.entity.BillingSummaryEntity;
+import com.example.credit_card.repository.BillingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+@Service
+public class BillingService {
+
+    @Autowired
+    private BillingRepository repository;
+
+    public void processFile(MultipartFile file) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()));
+
+        String line;
+        int count = 0;
+
+        while ((line = br.readLine()) != null) {
+
+            // Skip first 2 lines:
+            // 1. Total Record Count
+            // 2. Header
+            if (count < 2) {
+                count++;
+                continue;
+            }
+
+            String[] data = line.split("\\|");
+
+            BillingSummaryEntity entity = new BillingSummaryEntity();
+
+            entity.setCreditcardNumber(data[0]);
+            entity.setCustomerNumber(data[1]);
+            entity.setCustomerName(data[2]);
+            entity.setBillDate(data[3]);
+            entity.setAmount(Double.parseDouble(data[4]));
+            entity.setDueDate(data[5]);
+            entity.setCustomerEmail(data[6]);
+            entity.setContactNumber(data[7]);
+
+            repository.save(entity);
+        }
+    }
+}
+
+
+
+
+
+
+package com.example.credit_card.controller;
+
+import com.example.credit_card.service.BillingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/api")
+public class BillingController {
+
+    @Autowired
+    private BillingService service;
+
+    @PostMapping("/upload")
+    public String upload(@RequestParam("file") MultipartFile file) {
+        try {
+            service.processFile(file);
+            return "File processed successfully";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+}
+
+
+
+
+
+package com.example.credit_card.repository;
+
+import com.example.credit_card.entity.BillingSummaryEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BillingRepository extends JpaRepository<BillingSummaryEntity, Long> {
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+
+BASE=~/Hilton
+TODAY=$(date +%d_%m_%Y)
+INPUT="$BASE/input/credit_card_billing_${TODAY}.csv"
+OUTPUT="$BASE/output/Credit_card_billing_${TODAY}.dat"
+LOG="$BASE/logs/logs_${TODAY}.log"
+
+SENDER_EMAIL="noreply@hilton.com"
+COLLECTION_EMAIL="collection@hilton.com"
+ALERT_EMAIL="alert@hilton.com"
+
+API_URL="http://localhost:8080/api/upload"
+
+mkdir -p "$BASE/output" "$BASE/logs"
+
+echo "===== JOB START $(date) =====" >> "$LOG"
+
+# ==========================================
+# 1. FILE ARRIVAL TIME VALIDATION (3:00 AM)
+# ==========================================
+if [ -f "$INPUT" ]; then
+    FILE_TIME=$(stat -c %y "$INPUT" | cut -d' ' -f2 | cut -d'.' -f1)
+    FILE_HOUR=$(echo $FILE_TIME | cut -d':' -f1)
+
+    if [ "$FILE_HOUR" -gt 3 ]; then
+        echo "ALERT: File received late at $FILE_TIME" >> "$LOG"
+
+        echo "Input file delayed. Received at $FILE_TIME" | \
+        mail -r "$SENDER_EMAIL" -s "ALERT: File Delay" "$ALERT_EMAIL"
+    fi
+else
+    echo "ERROR: Input file missing" >> "$LOG"
+    exit 1
+fi
+
+# ==========================================
+# 2. ZERO RECORD CHECK
+# ==========================================
+[ $(tail -n +2 "$INPUT" | wc -l) -eq 0 ] && \
+echo "ERROR: Zero records" >> "$LOG" && exit 1
+
+TMP=$(mktemp)
+
+# ==========================================
+# 3. PROCESS FILE (FULL DATA)
+# ==========================================
+tail -n +2 "$INPUT" | while IFS="," read card cust name bill amt due email phone
+do
+    clean_due="${due%% *}"
+
+    echo "$card|$cust|$name|$bill|$amt|$clean_due|$email|$phone" >> "$TMP"
+done
+
+# ==========================================
+# 4. CREATE DAT FILE
+# ==========================================
+{
+echo "creditcard_number|customer_number|customer_name|bill_date|amount|due_date|customer_email|contact_number"
+cat "$TMP"
+} > "$OUTPUT"
+
+TOTAL=$(tail -n +2 "$OUTPUT" | wc -l)
+sed -i "1i Total Record Count: $TOTAL" "$OUTPUT"
+
+echo "Billing file created" >> "$LOG"
+
+# ==========================================
+# 5. SEND COLLECTION EMAIL
+# ==========================================
+echo "Sending department email..." >> "$LOG"
+
+echo "Total Record Count: $TOTAL" | \
+mail -r "$SENDER_EMAIL" -s "Billing Summary" -a "$OUTPUT" "$COLLECTION_EMAIL"
+
+# ==========================================
+# 6. SEND CUSTOMER EMAILS (FIXED)
+# ==========================================
+tail -n +3 "$OUTPUT" | while IFS="|" read card cust name bill amt due email phone
+do
+    BODY="Dear $name,
+
+Your billing summary:
+Amount: ₹$amt
+Due Date: $due
+
+Regards,
+Hilton Team"
+
+    echo "$BODY" | mail -r "$SENDER_EMAIL" -s "Billing Summary" "$email"
+
+    if [ $? -eq 0 ]; then
+        echo "Email sent to $email" >> "$LOG"
+    else
+        echo "Email FAILED for $email" >> "$LOG"
+    fi
+done
+
+# ==========================================
+# 7. CALL SPRING BOOT API
+# ==========================================
+echo "Triggering API..." >> "$LOG"
+
+curl -X POST "$API_URL" \
+-F "file=@$OUTPUT" >> "$LOG" 2>&1
+
+if [ $? -eq 0 ]; then
+    echo "API SUCCESS" >> "$LOG"
+else
+    echo "API FAILED" >> "$LOG"
+fi
+
+echo "===== JOB END $(date) =====" >> "$LOG"
